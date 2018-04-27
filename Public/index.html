@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="vue.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    
+</head>
+
+ <body>
+        <div id="app">
+            <h1>Todos</h1>
+            <input type="text" v-model='newtask'>
+            <button v-on:click="addTodo">Add</button>
+            <button v-on:click="clear">clear</button>
+            <ul>
+                <li  v-for="todo in todos">
+                    <input type="checkbox" v-model='todo.done' @click="EditTodo(todo)">
+                    {{todo.task}}
+                </li>
+            </ul>
+        </div>
+
+        <script>
+            let app=new Vue({
+                el:'#app',
+                data:{
+                    newtask:'',
+                    todos:[]
+                },
+                created: function () {
+                  console.log("I will run first.");
+                  axios.get('http://localhost:3000/todos').then((response) => {
+                      this.todos = response.data;
+                  });
+                }, 
+                methods:{
+                    addTodo(){
+                        if(this.newtask.length == 0)  return;
+                        console.log("Inside the addTdo method.");
+                 //this.todos.push({id:this.todos.length, task: this.newtask, done: false})
+                 axios.post('http://localhost:3000/todos',{task:this.newtask,done:false})
+                                    .then((res)=>{this.todos.push(res.data)})
+
+                        this.newtask = '';
+                    },
+                    clear(){
+                        console.log("Inside the clear todo method.");
+                      //  this.todos = this.todos.filter((todo)=> !todo.done)  
+                        axios.delete('http://localhost:3000/todos').then((response) => {
+                            this.todos = response.data;
+                        });
+                },
+                    EditTodo(todo){
+                            console.log("Edit done")
+                           
+                            axios.put('http://localhost:3000/todos/'+todo.id, {}).then((response) => {
+                                console.log("ID working.");
+                                //todo.done = !todo.done;
+                            });
+                    },
+                    
+
+                }
+            })
+        </script>
+
+</body>
+
+</html>
